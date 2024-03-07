@@ -3,7 +3,7 @@ cbuffer MatrixBuffer {
 	matrix worldMatrix;
 	matrix viewMatrix;
 	matrix projectionMatrix;
-}
+};
 
 // Typedefs
 struct VertexInput {
@@ -14,7 +14,7 @@ struct VertexInput {
 struct PixelInput {
 	float4 position : SV_POSITION;
 	float4 color : COLOR;
-}
+};
 
 // Vertex Shader
 PixelInput ColorVertexShader(VertexInput input){
@@ -24,9 +24,9 @@ PixelInput ColorVertexShader(VertexInput input){
 	input.position.w = 1.0f;
 	
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-	outputPosition = mul(input.position, worldMatrix);
-	outputPosition = mul(outputPosition, viewMatrix);
-	outputPosition = mul(outputPosition, projectionMatrix);
+	output.position = mul(input.position, worldMatrix);
+	output.position = mul(output.position, viewMatrix);
+	output.position = mul(output.position, projectionMatrix);
 
 	// Store the input color for the pixel shader to use.
 	output.color = input.color;
