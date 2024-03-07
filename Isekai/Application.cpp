@@ -1,4 +1,5 @@
 #include "Application.h"
+#include <iostream>
 
 Application::Application() {
 	m_direct3D = nullptr;
@@ -24,6 +25,14 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 		return false;
 	}
 
+	char cardName[128];
+	int memory;
+
+	// Call the function to get video card info
+	m_direct3D->getVideoCardInfo(cardName, memory);
+
+	std::cout << cardName << std::endl;
+
 	return true;
 }
 
@@ -47,7 +56,7 @@ bool Application::frame() {
 
 bool Application::render() {
 	// Clear the buffers to begin the scene.
-	m_direct3D->beginScene(0.5f, 0.5f, 0.5f, 1.0f);
+	m_direct3D->beginScene(1.f, 1.f, 0.5f, 1.0f);
 
 	// Present the rendered scene to the screen.
 	m_direct3D->endScene();
