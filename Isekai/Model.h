@@ -6,7 +6,6 @@
 
 #include "Texture.h"
 
-
 using namespace DirectX;
 
 class Model {
@@ -14,6 +13,7 @@ private:
 	struct Vertex {
 		XMFLOAT3 position;
 		XMFLOAT2 texture;
+		XMFLOAT3 normal;
 	};
 
 public:

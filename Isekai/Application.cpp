@@ -5,7 +5,8 @@ Application::Application() {
 	m_direct3D = nullptr;
 	m_camera = nullptr;
 	m_model = nullptr;
-	m_textureShader = nullptr;
+	m_light = nullptr;
+	m_lightShader = nullptr;
 }
 
 Application::Application(const Application& other) {
@@ -47,25 +48,37 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 		return false;
 	}
 
-	// Create and initialize the texture shader object.
-	m_textureShader = new TextureShader();
+	// Create and initialize the light shader object.
+	m_lightShader = new LightShader();
 
-	result = m_textureShader->initialize(m_direct3D->getDevice(), hwnd);
+	result = m_lightShader->initialize(m_direct3D->getDevice(), hwnd);
 	if (!result) {
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
 		return false;
 	}
+
+	// Create and initialize the light object.
+	m_light = new Light();
+
+	m_light->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_light->setDirection(0.0f, 0.0f, 1.0f);
 
 	return true;
 }
 
 void Application::shutdown() {
-	// Release the texture shader object.
-	if (m_textureShader)
+	// Release the light object.
+	if (m_light){
+		delete m_light;
+		m_light = nullptr;
+	}
+
+	// Release the light shader object.
+	if (m_lightShader)
 	{
-		m_textureShader->shutdown();
-		delete m_textureShader;
-		m_textureShader = nullptr;
+		m_lightShader->shutdown();
+		delete m_lightShader;
+		m_lightShader = nullptr;
 	}
 
 	// Release the model object.
@@ -92,15 +105,22 @@ void Application::shutdown() {
 }
 
 bool Application::frame() {
+	static float rotation = 0.0f;
 	bool result;
 
+	// Update the rotation variable each frame.
+	rotation -= 0.0174532925f * 0.8f;
+	if (rotation < 0.0f) {
+		rotation += 360.0f;
+	}
+
 	// Render the graphics scene.
-	result = render();
+	result = render(rotation);
 
 	return result;
 }
 
-bool Application::render() {
+bool Application::render(float rotation) {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
 
@@ -115,11 +135,14 @@ bool Application::render() {
 	m_camera->getViewMatrix(viewMatrix);
 	m_direct3D->getProjectionMatrix(projectionMatrix);
 
+	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	worldMatrix = XMMatrixRotationY(rotation);
+
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_model->render(m_direct3D->getDeviceContext());
 
 	// Render the model using the texture shader.
-	result = m_textureShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture());
+	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getDiffuseColor());
 	if (!result) {
 		return false;
 	}

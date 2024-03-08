@@ -9,15 +9,17 @@ cbuffer MatrixBuffer {
 struct VertexInput {
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
 };
 
 struct PixelInput {
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
 };
 
 // Vertex Shader.
-PixelInput TextureVertexShader(VertexInput input) {
+PixelInput LightVertexShader(VertexInput input) {
     PixelInput output;
 
     // Change the position vector to be 4 units for proper matrix calculations.
@@ -30,6 +32,12 @@ PixelInput TextureVertexShader(VertexInput input) {
 
     // Store the texture coordinates for the pixel shader.
     output.tex = input.tex;
+
+    // Calculate the normal vector against the world matrix only.
+    output.normal = mul(input.normal, (float3x3)worldMatrix);
+
+    // Normalize the vector.
+    output.normal = normalize(output.normal);
 
     return output;
 }
