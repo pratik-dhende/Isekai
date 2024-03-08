@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "Model.h"
 #include "ColorShader.h"
+#include "TextureShader.h"
 
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
@@ -30,7 +31,7 @@ private:
 	Direct3D* m_direct3D;
 	Camera* m_camera;
 	Model* m_model;
-	ColorShader* m_colorShader;
+	TextureShader* m_textureShader;
 };
 
 #endif

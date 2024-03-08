@@ -5,7 +5,7 @@ Application::Application() {
 	m_direct3D = nullptr;
 	m_camera = nullptr;
 	m_model = nullptr;
-	m_colorShader = nullptr;
+	m_textureShader = nullptr;
 }
 
 Application::Application(const Application& other) {
@@ -17,6 +17,7 @@ Application::~Application() {
 }
 
 bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
+	char textureFilename[128];
 	bool result;
 
 	// Create and initialize the Direct3D object.
@@ -37,18 +38,21 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 	// Create and initialize the model object.
 	m_model = new Model();
 
-	result = m_model->initialize(m_direct3D->getDevice());
+	// Set the name of the texture file that we will be loading.
+	strcpy_s(textureFilename, "../Isekai/data/stone01.tga");
+
+	result = m_model->initialize(m_direct3D->getDevice(), m_direct3D->getDeviceContext(), textureFilename);
 	if (!result) {
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
 		return false;
 	}
 
-	// Create and initialize the color shader object.
-	m_colorShader = new ColorShader();
+	// Create and initialize the texture shader object.
+	m_textureShader = new TextureShader();
 
-	result = m_colorShader->initialize(m_direct3D->getDevice(), hwnd);
+	result = m_textureShader->initialize(m_direct3D->getDevice(), hwnd);
 	if (!result) {
-		MessageBox(hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -56,12 +60,12 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 }
 
 void Application::shutdown() {
-	// Release the color shader object.
-	if (m_colorShader)
+	// Release the texture shader object.
+	if (m_textureShader)
 	{
-		m_colorShader->shutdown();
-		delete m_colorShader;
-		m_colorShader = nullptr;
+		m_textureShader->shutdown();
+		delete m_textureShader;
+		m_textureShader = nullptr;
 	}
 
 	// Release the model object.
@@ -114,8 +118,8 @@ bool Application::render() {
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_model->render(m_direct3D->getDeviceContext());
 
-	// Render the model using the color shader.
-	result = m_colorShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
+	// Render the model using the texture shader.
+	result = m_textureShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture());
 	if (!result) {
 		return false;
 	}

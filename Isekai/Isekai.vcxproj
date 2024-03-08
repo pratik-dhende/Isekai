@@ -28,6 +28,8 @@
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="System.h" />
+    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TextureShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application.h" />
@@ -36,10 +38,14 @@
     <ClInclude Include="Direct3D.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="Model.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureShader.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="color.ps" />
     <None Include="color.vs" />
+    <None Include="texture.ps" />
+    <None Include="texture.vs" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
