@@ -4,6 +4,7 @@ Model::Model() {
 	m_vertexBuffer = nullptr;
 	m_indexBuffer = nullptr;
 	m_texture = nullptr;
+	m_model = nullptr;
 }
 
 Model::Model(const Model& other) {
@@ -14,8 +15,14 @@ Model::~Model() {
 
 }
 
-bool Model::initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFileName) {
+bool Model::initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFileName, char* textureFileName) {
 	bool result;
+
+	// Load in the model data.
+	result = loadModel(modelFileName);
+	if (!result) {
+		return false;
+	}
 
 	// Initialize the vertex and index buffers.
 	result = initializeBuffers(device);
@@ -39,6 +46,9 @@ void Model::shutdown()
 
 	// Shutdown the vertex and index buffers.
 	shutdownBuffers();
+
+	// Release the model data.
+	releaseModel();
 }
 
 void Model::render(ID3D11DeviceContext* deviceContext)
@@ -64,12 +74,6 @@ bool Model::initializeBuffers(ID3D11Device* device) {
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
 
-	// Set the number of vertices in the vertex array.
-	m_vertexCount = 3;
-
-	// Set the number of indices in the index array.
-	m_indexCount = 3;
-
 	// Create the vertex array.
 	vertices = new Vertex[m_vertexCount];
 	if (!vertices) {
@@ -83,22 +87,13 @@ bool Model::initializeBuffers(ID3D11Device* device) {
 	}
 
 	// Load the vertex array with data.
-	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f); // Bottom Left.
-	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
-	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
+	for (int i = 0; i < m_vertexCount; i++) {
+		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 
-	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Top middle.
-	vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
-	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
-	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
-	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
-
-	// Load the index array with data.
-	indices[0] = 0;  // Bottom left.
-	indices[1] = 1;  // Top middle.
-	indices[2] = 2;  // Bottom right.
+		indices[i] = i;
+	}
 	 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -182,6 +177,7 @@ void Model::renderBuffers(ID3D11DeviceContext* deviceContext) {
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
+
 bool Model::loadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* fileName) {
 	bool result;
 
@@ -205,6 +201,53 @@ void Model::releaseTexture() {
 	}
 }
 
+bool Model::loadModel(char* fileName) {
+	ifstream fin;
+	char input;
+
+	// Open the model file.
+	fin.open(fileName);
+
+	// If it could not open the file then exit.
+	do {
+		fin.get(input);
+	} while (input != ':');
+
+	// Read in the vertex count.
+	fin >> m_vertexCount;
+
+	// Set the number of indices to be the same as the vertex count.
+	m_indexCount = m_vertexCount;
+
+	// Create the model using the vertex count that was read in.
+	m_model = new ModelFormat[m_vertexCount];
+
+	// Read up to the beginning of the data.
+	do {
+		fin.get(input);
+	} while (input != ':');
+	fin.get(input);
+	fin.get(input);
+
+	// Read in the vertex data.
+	for (int i = 0; i < m_vertexCount; i++) {
+		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
+		fin >> m_model[i].tu >> m_model[i].tv;
+		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
+	}
+
+	// Close the model file.
+	fin.close();
+
+	return true;
+}
+
+void Model::releaseModel() {
+	if (m_model) {
+		delete[] m_model;
+		m_model = nullptr;
+	}
+}
 
 
 

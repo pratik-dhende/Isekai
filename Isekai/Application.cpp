@@ -18,7 +18,8 @@ Application::~Application() {
 }
 
 bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
-	char textureFilename[128];
+	char modelFileName[128];
+	char textureFileName[128];
 	bool result;
 
 	// Create and initialize the Direct3D object.
@@ -39,10 +40,13 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 	// Create and initialize the model object.
 	m_model = new Model();
 
-	// Set the name of the texture file that we will be loading.
-	strcpy_s(textureFilename, "../Isekai/data/stone01.tga");
+	// Set the file name of the model.
+	strcpy_s(modelFileName, "../Isekai/data/cube.txt");
 
-	result = m_model->initialize(m_direct3D->getDevice(), m_direct3D->getDeviceContext(), textureFilename);
+	// Set the name of the texture file that we will be loading.
+	strcpy_s(textureFileName, "../Isekai/data/stone01.tga");
+
+	result = m_model->initialize(m_direct3D->getDevice(), m_direct3D->getDeviceContext(), modelFileName, textureFileName);
 	if (!result) {
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
 		return false;
