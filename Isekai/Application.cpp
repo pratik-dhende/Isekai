@@ -35,7 +35,7 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 	m_camera = new Camera();
 	
 	// Set the initial position of the camera.
-	m_camera->setPosition(0.0, 0.0, -5.0f);
+	m_camera->setPosition(0.0, 0.0, -10.0f);
 
 	// Create and initialize the model object.
 	m_model = new Model();
@@ -125,7 +125,7 @@ bool Application::frame() {
 }
 
 bool Application::render(float rotation) {
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, rotateMatrix, translateMatrix, scaleMatrix, srMatrix;
 	bool result;
 
 	// Clear the buffers to begin the scene.
@@ -139,13 +139,33 @@ bool Application::render(float rotation) {
 	m_camera->getViewMatrix(viewMatrix);
 	m_direct3D->getProjectionMatrix(projectionMatrix);
 
-	// Rotate the world matrix by the rotation value so that the triangle will spin.
-	worldMatrix = XMMatrixRotationY(rotation);
+	rotateMatrix = XMMatrixRotationY(rotation);  // Build the rotation matrix.
+	translateMatrix = XMMatrixTranslation(-2.0f, 0.0f, 0.0f); // Build the translation matrix.
+
+	// Multiply them together to create the final world transformation matrix.
+	worldMatrix = XMMatrixMultiply(rotateMatrix, translateMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_model->render(m_direct3D->getDeviceContext());
 
-	// Render the model using the texture shader.
+	// Render the model using the light shader.
+	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getDiffuseColor());
+	if (!result) {
+		return false;
+	}
+
+	scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f); // Build the scaling matrix.
+	rotateMatrix = XMMatrixRotationY(rotation); // Build the rotation matrix.
+	translateMatrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f); // Build the translation matrix.
+
+	// Multiply the scale, rotation, and translation matrices together to create the final world transformation matrix.
+	srMatrix = XMMatrixMultiply(scaleMatrix, rotateMatrix);
+	worldMatrix = XMMatrixMultiply(srMatrix, translateMatrix);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_model->render(m_direct3D->getDeviceContext());
+
+	// Render the model using the light shader.
 	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getDiffuseColor());
 	if (!result) {
 		return false;
