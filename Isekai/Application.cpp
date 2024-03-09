@@ -41,7 +41,7 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 	m_model = new Model();
 
 	// Set the file name of the model.
-	strcpy_s(modelFileName, "../Isekai/data/cube.txt");
+	strcpy_s(modelFileName, "../Isekai/data/sphere.txt");
 
 	// Set the name of the texture file that we will be loading.
 	strcpy_s(textureFileName, "../Isekai/data/stone01.tga");
@@ -66,7 +66,9 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 
 	m_light->setAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
 	m_light->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_light->setDirection(1.0f, 0.0f, 0.0f);
+	m_light->setDirection(1.0f, 0.0f, 1.0f);
+	m_light->setSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_light->setSpecularPower(32.0f);
 
 	return true;
 }
@@ -147,7 +149,7 @@ bool Application::render(float rotation) {
 	m_model->render(m_direct3D->getDeviceContext());
 
 	// Render the model using the light shader.
-	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getAmbientColor(), m_light->getDiffuseColor());
+	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getAmbientColor(), m_light->getDiffuseColor(), m_camera->getPosition(), m_light->getSpecularColor(), m_light->getSpecularPower());
 	if (!result) {
 		return false;
 	}

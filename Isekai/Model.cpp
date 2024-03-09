@@ -209,6 +209,11 @@ bool Model::loadModel(char* fileName) {
 	fin.open(fileName);
 
 	// If it could not open the file then exit.
+	if (fin.fail()) {
+		return false;
+	}
+
+	// Read up to the value of vertex count.
 	do {
 		fin.get(input);
 	} while (input != ':');

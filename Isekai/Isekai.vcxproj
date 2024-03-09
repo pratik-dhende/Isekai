@@ -42,8 +42,8 @@
     <ClInclude Include="LightShader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="light.ps" />
-    <None Include="light.vs" />
+    <None Include="light.psh" />
+    <None Include="light.vsh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
