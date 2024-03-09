@@ -5,8 +5,8 @@ Application::Application() {
 	m_direct3D = nullptr;
 	m_camera = nullptr;
 	m_model = nullptr;
-	m_light = nullptr;
 	m_lightShader = nullptr;
+	m_lights = nullptr;
 }
 
 Application::Application(const Application& other) {
@@ -35,13 +35,13 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 	m_camera = new Camera();
 	
 	// Set the initial position of the camera.
-	m_camera->setPosition(0.0, 0.0, -10.0f);
+	m_camera->setPosition(0.0f, 2.0f, -12.0f);
 
 	// Create and initialize the model object.
 	m_model = new Model();
 
 	// Set the file name of the model.
-	strcpy_s(modelFileName, "../Isekai/data/sphere.txt");
+	strcpy_s(modelFileName, "../Isekai/data/plane.txt");
 
 	// Set the name of the texture file that we will be loading.
 	strcpy_s(textureFileName, "../Isekai/data/stone01.tga");
@@ -61,23 +61,34 @@ bool Application::initialize(int screenWidth, int screenHeight, HWND hwnd) {
 		return false;
 	}
 
-	// Create and initialize the light object.
-	m_light = new Light();
+	// Set the number of lights we will use.
+	m_numLights = 4;
 
-	m_light->setAmbientColor(0.15f, 0.15f, 0.15f, 1.0f);
-	m_light->setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_light->setDirection(1.0f, 0.0f, 1.0f);
-	m_light->setSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
-	m_light->setSpecularPower(32.0f);
+	// Create and initialize the light objects array.
+	m_lights = new Light[m_numLights];
+
+	// Manually set the color and position of each light.
+	m_lights[0].setDiffuseColor(1.0f, 0.0f, 0.0f, 1.0f);  // Red
+	m_lights[0].setPosition(-3.0f, 1.0f, 3.0f);
+
+	m_lights[1].setDiffuseColor(0.0f, 1.0f, 0.0f, 1.0f);  // Green
+	m_lights[1].setPosition(3.0f, 1.0f, 3.0f);
+
+	m_lights[2].setDiffuseColor(0.0f, 0.0f, 1.0f, 1.0f);  // Blue
+	m_lights[2].setPosition(-3.0f, 1.0f, -3.0f);
+
+	m_lights[3].setDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);  // White
+	m_lights[3].setPosition(3.0f, 1.0f, -3.0f);
 
 	return true;
 }
 
 void Application::shutdown() {
-	// Release the light object.
-	if (m_light){
-		delete m_light;
-		m_light = nullptr;
+	// Release the light objects.
+	if (m_lights)
+	{
+		delete[] m_lights;
+		m_lights = nullptr;
 	}
 
 	// Release the light shader object.
@@ -129,6 +140,8 @@ bool Application::frame() {
 
 bool Application::render(float rotation) {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	XMFLOAT4 diffuseColor[4], lightPosition[4];
+	int i;
 	bool result;
 
 	// Clear the buffers to begin the scene.
@@ -142,14 +155,21 @@ bool Application::render(float rotation) {
 	m_camera->getViewMatrix(viewMatrix);
 	m_direct3D->getProjectionMatrix(projectionMatrix);
 
-	// Rotate the world matrix by the rotation value so that the model will spin.
-	worldMatrix = XMMatrixRotationY(rotation);
+	// Get the light properties.
+	for (i = 0; i < m_numLights; i++)
+	{
+		// Create the diffuse color array from the four light colors.
+		diffuseColor[i] = m_lights[i].getDiffuseColor();
+
+		// Create the light position array from the four light positions.
+		lightPosition[i] = m_lights[i].getPosition();
+	}
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_model->render(m_direct3D->getDeviceContext());
 
 	// Render the model using the light shader.
-	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), m_light->getDirection(), m_light->getAmbientColor(), m_light->getDiffuseColor(), m_camera->getPosition(), m_light->getSpecularColor(), m_light->getSpecularPower());
+	result = m_lightShader->render(m_direct3D->getDeviceContext(), m_model->getIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_model->getTexture(), diffuseColor, lightPosition);
 	if (!result) {
 		return false;
 	}

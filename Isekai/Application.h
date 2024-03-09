@@ -31,8 +31,9 @@ private:
 	Direct3D* m_direct3D;
 	Camera* m_camera;
 	Model* m_model;
-	Light* m_light;
 	LightShader* m_lightShader;
+	Light* m_lights;
+	int m_numLights;
 };
 
 #endif

@@ -15,12 +15,14 @@ public:
 	void setDirection(float, float, float);
 	void setSpecularColor(float, float, float, float);
 	void setSpecularPower(float);
+	void setPosition(float, float, float);
 
 	XMFLOAT4 getAmbientColor();
 	XMFLOAT4 getDiffuseColor();
 	XMFLOAT3 getDirection();
 	XMFLOAT4 getSpecularColor();
 	float getSpecularPower();
+	XMFLOAT4 getPosition();
 
 private:
 	XMFLOAT4 m_ambientColor;
@@ -28,5 +30,6 @@ private:
 	XMFLOAT3 m_direction;
 	XMFLOAT4 m_specularColor;
 	float m_specularPower;
+	XMFLOAT4 m_position;
 };
 #endif
