@@ -5,8 +5,7 @@ A DirectX11 based Graphics Engine.
 `C++ • Win32 • DirectX11 • HLSL • RenderDoc`
 
 ## Motivation
-- To learn DirectX11 API and HLSL
-- Playground for quick prototyping of graphics implementations
+Main objective was to learn DirectX11 API and HLSL good enough to implement a [Deferred Rendering Pipeline](https://github.com/pratik-dhende/Prime-Engine-Deferred-Renderer) and [Real-Time Procedural Terrain Rendering using Ray Marching](https://github.com/pratik-dhende/Real-Time-Procedural-Terrain-Rendering-using-Ray-Marching) in a proprietary game engine for my CSCI 522 Game Engine Development at University of Southern California's course final projects.
 
 ## Features
 - DirectX11 Graphics Framework
