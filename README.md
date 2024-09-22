@@ -2,7 +2,7 @@
 A DirectX11 based Graphics Engine.
 
 ## Technological Stack
-`C++ • Win32 • DirectX11 • HLSL`
+`C++ • Win32 • DirectX11 • HLSL • RenderDoc`
 
 ## Motivation
 - To learn DirectX11 API and HLSL
